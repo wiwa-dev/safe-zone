@@ -18,7 +18,7 @@ pipeline {
                 sh 'java -version'
                 sh 'mvn -version'
                 sh 'docker --version'
-                sh 'docker-compose --version'
+                sh 'docker compose --version'
             }
         }
          // Docker Login
@@ -231,7 +231,7 @@ pipeline {
         // Deploy Docker Compose
         stage('Deploy') {
             steps {
-                sh "docker-compose -f ${COMPOSE_FILE} pull"
+                sh "docker compose -f ${COMPOSE_FILE} pull"
                 sh 'chmod +x start-app.sh'
                 sh './start-app.sh'
             }
@@ -241,7 +241,7 @@ pipeline {
                     echo '❌ Échec du déploiement → Rollback...'
 
                     // 1️⃣ Stopper complètement la stack
-                    sh "docker-compose -f ${COMPOSE_FILE} down"
+                    sh "docker compose -f ${COMPOSE_FILE} down"
 
                     // 2️⃣ Rollback des images modifiées
                     script {
