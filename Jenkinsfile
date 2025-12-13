@@ -119,6 +119,14 @@ pipeline {
                 }
             }
         }
+
+        stage('SonarQube Analysis') {
+            def scannerHome = tool 'sonar8';
+            withSonarQubeEnv() {
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+            }
+        
         stage('Build Backend Server Config') {
             when {
                 expression {
@@ -137,7 +145,7 @@ pipeline {
                 }
             }
         }
-        stage('Build Backend') {
+        stage('Build Backend Service') {
             when {
                 expression {
                     CHANGED_SERVICES.size() > 0
