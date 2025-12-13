@@ -120,12 +120,17 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
-            def scannerHome = tool 'sonar8';
-            withSonarQubeEnv() {
-                    sh "${scannerHome}/bin/sonar-scanner"
+       stage('SonarQube Analysis') {
+           steps {
+               script {
+                   def scannerHome = tool 'sonar8'
+                   withSonarQubeEnv('sonarqube') {
+                       sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
+        }
+
         
         stage('Build Backend Server Config') {
             when {
