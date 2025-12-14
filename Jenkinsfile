@@ -121,15 +121,67 @@ pipeline {
         }
 
        stage('SonarQube Analysis') {
-           steps {
-               script {
-                   def scannerHome = tool 'sonar8'
-                   withSonarQubeEnv('sonarqube') {
-                       sh "${scannerHome}/bin/sonar-scanner"
+    when {
+        expression {
+            CHANGED_SERVICES.size() > 0 || CHANGED_SERVER_CONFIG.size() > 0 || FRONTEND_CHANGED
+        }
+    }
+    steps {
+        script {
+            withSonarQubeEnv('sonarqube') {
+
+                def tasks = [:]
+
+                // 🔹 Backend microservices
+                CHANGED_SERVICES.each { svc ->
+                    tasks["sonar-${svc}"] = {
+                        dir("backend/services/${svc}") {
+                            sh 'mvn clean verify sonar:sonar'
+                        }
                     }
+                }
+
+                // 🔹 Server config services
+                CHANGED_SERVER_CONFIG.each { svc ->
+                    tasks["sonar-${svc}"] = {
+                        dir("backend/services/${svc}") {
+                            sh 'mvn clean verify sonar:sonar'
+                        }
+                    }
+                }
+
+                // 🔹 Frontend (Angular / JS)
+                if (FRONTEND_CHANGED) {
+                    tasks["sonar-frontend"] = {
+                        dir("frontend") {
+                            sh '''
+                            sonar-scanner \
+                              -Dsonar.projectKey=front-service \
+                              -Dsonar.sources=src
+                            '''
+                        }
+                    }
+                }
+
+                parallel tasks
+            }
+        }
+    }
+}
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    script {
+                         def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                        error "❌ Quality Gate failed: ${qg.status}"
                 }
             }
         }
+    }
+}
+
 
         
         stage('Build Backend Server Config') {
