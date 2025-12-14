@@ -18,7 +18,7 @@ pipeline {
                 sh 'java -version'
                 sh 'mvn -version'
                 sh 'docker --version'
-                sh 'docker compose --version'
+                sh 'docker compose version'
             }
         }
          // Docker Login
@@ -121,53 +121,12 @@ pipeline {
         }
 
        stage('SonarQube Analysis') {
-    when {
-        expression {
-            CHANGED_SERVICES.size() > 0 || CHANGED_SERVER_CONFIG.size() > 0 || FRONTEND_CHANGED
-        }
-    }
-    steps {
-        script {
-            withSonarQubeEnv('sonarqube') {
-
-                def tasks = [:]
-
-                // 🔹 Backend microservices
-                CHANGED_SERVICES.each { svc ->
-                    tasks["sonar-${svc}"] = {
-                        dir("backend/services/${svc}") {
-                            sh 'mvn clean verify sonar:sonar'
-                        }
-                    }
+           steps {
+                 withSonarQubeEnv('sonarqube') {
+                    sh 'mvn -B -DskipTests verify sonar:sonar'
                 }
-
-                // 🔹 Server config services
-                CHANGED_SERVER_CONFIG.each { svc ->
-                    tasks["sonar-${svc}"] = {
-                        dir("backend/services/${svc}") {
-                            sh 'mvn clean verify sonar:sonar'
-                        }
-                    }
-                }
-
-                // 🔹 Frontend (Angular / JS)
-                if (FRONTEND_CHANGED) {
-                    tasks["sonar-frontend"] = {
-                        dir("frontend") {
-                            sh '''
-                            sonar-scanner \
-                              -Dsonar.projectKey=front-service \
-                              -Dsonar.sources=src
-                            '''
-                        }
-                    }
-                }
-
-                parallel tasks
-            }
-        }
-    }
-}
+           }
+       }
 
         stage('Quality Gate') {
             steps {
