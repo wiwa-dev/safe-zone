@@ -123,7 +123,9 @@ pipeline {
        stage('SonarQube Analysis') {
            steps {
                  withSonarQubeEnv('sonarqube') {
-                    sh 'mvn -B -DskipTests verify sonar:sonar'
+                    dir("backend/services/user") {
+                        sh 'mvn clean package -DskipTests  sonar:sonar -Dsonar.projectKey=safe-zone -Dsonar.projectName="safe-zone"'
+                    }
                 }
            }
        }
