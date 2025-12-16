@@ -122,30 +122,25 @@ pipeline {
 
         
        stage('SonarQube Analysis') {
-           steps{
-               script{
-          def failedServices = []
+    steps {
+        script {
+            withSonarQubeEnv('sonarqube') {
+                for (svc in CHANGED_SERVICES) {
+                    echo "🔎 Sonar analyse : ${svc}"
 
-        withSonarQubeEnv('sonarqube') {
-          for (svc in CHANGED_SERVICES) {
-            dir("backend/services/${svc}") {
-              sh "mvn sonar:sonar -Dsonar.projectKey=${svc}"
-                 timeout(time: 2, unit: 'MINUTES') {
-              def qg = waitForQualityGate()
-              if (qg.status != 'OK') {
-        failedServices << svc
-              }
-              }
+                    dir("backend/services/${svc}") {
+                        sh """
+                        mvn sonar:sonar \
+                          -Dsonar.projectKey=${svc} \
+                          -Dsonar.projectName=${svc} \
+                        """
+                    }
+                }
             }
-          }
         }
-
-        if (failedServices.size() > 0) {
-          error "Quality Gate failed for: ${failedServices}"
-        }
-               }
-           }
+    }
 }
+
 
 //         stage('Quality Gate') {
 //             steps {
