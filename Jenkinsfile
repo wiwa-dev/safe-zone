@@ -122,6 +122,8 @@ pipeline {
 
         
        stage('SonarQube Analysis') {
+           steps{
+               script{
           def failedServices = []
 
         withSonarQubeEnv('sonarqube') {
@@ -139,6 +141,8 @@ pipeline {
         if (failedServices.size() > 0) {
           error "Quality Gate failed for: ${failedServices}"
         }
+               }
+           }
 }
 
         stage('Quality Gate') {
