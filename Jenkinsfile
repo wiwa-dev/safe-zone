@@ -121,12 +121,23 @@ pipeline {
         }
 
        stage('SonarQube Analysis') {
-           steps {
-                 withSonarQubeEnv('sonarqube') {
-                    dir("backend/services/config-server") {
-                        sh 'mvn clean package -DskipTests  sonar:sonar -Dsonar.projectKey=safe-zone -Dsonar.projectName="safe-zone"'
-                    }
+           when {
+                expression {
+                    CHANGED_SERVICES.size() > 0
                 }
+            }
+           steps {
+                 scritp{
+                      parallel CHANGED_SERVICES.collectEntries {
+                        svc -> ["Sonar-Analyse-${svc}": {
+                             withSonarQubeEnv('sonarqube') {
+                                dir("backend/services/${svc}") {
+                                    sh "mvn clean package -DskipTests  sonar:sonar -Dsonar.projectKey=${svc}"
+                                }
+                             }
+                        }]
+                    } 
+                 }
            }
        }
 
