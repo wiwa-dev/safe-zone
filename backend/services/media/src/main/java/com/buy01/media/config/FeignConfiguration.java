@@ -22,7 +22,7 @@ public class FeignConfiguration {
     public Client feignClient() {
         try {
             // Créer un gestionnaire de confiance qui accepte tous les certificats
-            // sans effectuer aucune vérification
+            // sans effectuer aucune vérification.
             TrustManager[] trustAllCerts = new TrustManager[]{
                 new X509TrustManager() {
                     @Override
