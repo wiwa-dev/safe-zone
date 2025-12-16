@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data // Annotation Lombok pour générer les getters, setters, toString, equals et
       // hashCode
 @NoArgsConstructor // Annotation Lombok pour générer un constructeur sans arguments
-@AllArgsConstructor // Annotation Lombok pour générer un constructeur avec tous les champs
+@AllArgsConstructor // Annotation Lombok pour générer un constructeur avec tous les champs.
 public class Product {
     @Id
     private String id;
