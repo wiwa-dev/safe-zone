@@ -12,7 +12,7 @@ import com.cloudinary.utils.ObjectUtils;
 public class CloudinaryService {
     private final Cloudinary cloudinary;
 
-
+// comment
     public CloudinaryService(@Value("${cloudinary.name}") String cloudName,
             @Value("${cloudinary.api_key}") String apiKey,
             @Value("${cloudinary.api_secret}") String apiSecret) {
