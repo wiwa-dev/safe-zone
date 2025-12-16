@@ -120,26 +120,26 @@ pipeline {
             }
         }
 
+        
        stage('SonarQube Analysis') {
-           when {
-                expression {
-                    CHANGED_SERVICES.size() > 0
-                }
+          def failedServices = []
+
+        withSonarQubeEnv('sonarqube') {
+          for (svc in CHANGED_SERVICES) {
+            dir("backend/services/${svc}") {
+              sh "mvn sonar:sonar -Dsonar.projectKey=${svc}"
+              def qg = waitForQualityGate()
+              if (qg.status != 'OK') {
+        failedServices << svc
+              }
             }
-           steps {
-                 script {
-                      parallel CHANGED_SERVICES.collectEntries {
-                        svc -> ["Sonar-Analyse-${svc}": {
-                             withSonarQubeEnv('sonarqube') {
-                                dir("backend/services/${svc}") {
-                                    sh "mvn clean package -DskipTests  sonar:sonar -Dsonar.projectKey=${svc}"
-                                }
-                             }
-                        }]
-                    } 
-                 }
-           }
-       }
+          }
+        }
+
+        if (failedServices.size() > 0) {
+          error "Quality Gate failed for: ${failedServices}"
+        }
+}
 
         stage('Quality Gate') {
             steps {
