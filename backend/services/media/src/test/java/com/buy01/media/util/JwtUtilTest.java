@@ -21,6 +21,6 @@ class JwtUtilTest {
 
     @Test
     void testIsTokenValid_withInvalidToken() {
-        assertTrue(jwtUtil.isTokenValid("invalid.token.here"));
+        assertFalse(jwtUtil.isTokenValid("invalid.token.here"));
     }
 }
