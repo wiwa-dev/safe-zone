@@ -127,7 +127,7 @@ pipeline {
                 }
             }
            steps {
-                 scritp{
+                 script {
                       parallel CHANGED_SERVICES.collectEntries {
                         svc -> ["Sonar-Analyse-${svc}": {
                              withSonarQubeEnv('sonarqube') {
