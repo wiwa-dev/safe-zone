@@ -20,7 +20,7 @@ import com.buy01.user.service.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-//
+//controller
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
