@@ -130,17 +130,11 @@ pipeline {
                     dir("backend/services/${svc}") {
 
                         sh """
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=${svc} \
+                        mvn sonar:sonar -DskipTests \
+                          -Dsonar.projectKey=${svc}-service \
                           -Dsonar.projectName=${svc}
                         """
 
-                        timeout(time: 2, unit: 'MINUTES') {
-                            def qg = waitForQualityGate()
-                            if (qg.status != 'OK') {
-                                error "❌ Quality Gate failed for ${svc}"
-                            }
-                        }
                     }
                 }
             }
@@ -150,21 +144,21 @@ pipeline {
 
 
 
-//         stage('Quality Gate') {
-//             when {
-//                     expression{CHANGED_SERVICES.size() > 0}
-//                 }
-//             steps {
-//                 timeout(time: 2, unit: 'MINUTES') {
-//                     script {
-//                          def qg = waitForQualityGate()
-//                         if (qg.status != 'OK') {
-//                         error "❌ Quality Gate failed: ${qg.status}"
-//                 }
-//             }
-//         }
-//     }
-// }
+        stage('Quality Gate') {
+            when {
+                    expression{CHANGED_SERVICES.size() > 0}
+                }
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    script {
+                         def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                        error "❌ Quality Gate failed: ${qg.status}"
+                }
+            }
+        }
+    }
+}
 
 
         
