@@ -143,6 +143,9 @@ pipeline {
 
 
         stage('Quality Gate') {
+            when {
+                    expression{CHANGED_SERVICES.size() > 0}
+                }
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     script {
