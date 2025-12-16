@@ -130,9 +130,11 @@ pipeline {
           for (svc in CHANGED_SERVICES) {
             dir("backend/services/${svc}") {
               sh "mvn sonar:sonar -Dsonar.projectKey=${svc}"
+                 timeout(time: 2, unit: 'MINUTES') {
               def qg = waitForQualityGate()
               if (qg.status != 'OK') {
         failedServices << svc
+              }
               }
             }
           }
