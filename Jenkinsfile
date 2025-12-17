@@ -125,18 +125,15 @@ pipeline {
     steps {
         script {
             withSonarQubeEnv('sonarqube') {
-                for (svc in CHANGED_SERVICES) {
-
-                    dir("backend/services/${svc}") {
+                    dir("backend/services") {
 
                         sh """
                         mvn sonar:sonar -DskipTests \
-                          -Dsonar.projectKey=${svc}-service \
-                          -Dsonar.projectName=${svc}
+                          -Dsonar.projectKey=safe-zone \
+                          -Dsonar.projectName=safe-zone
                         """
 
                     }
-                }
             }
         }
     }
@@ -145,9 +142,6 @@ pipeline {
 
 
         stage('Quality Gate') {
-            when {
-                    expression{CHANGED_SERVICES.size() > 0}
-                }
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     script {
