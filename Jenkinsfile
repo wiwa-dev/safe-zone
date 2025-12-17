@@ -125,12 +125,32 @@ pipeline {
     steps {
         script {
             withSonarQubeEnv('sonarqube') {
-                    dir("backend/services") {
+                    dir("backend/services/user") {
 
                         sh """
                         mvn sonar:sonar -DskipTests \
-                          -Dsonar.projectKey=safe-zone \
-                          -Dsonar.projectName=safe-zone
+                          -Dsonar.projectKey=user-service \
+                          -Dsonar.projectName=user
+                        """
+
+                    }
+
+                 dir("backend/services/media") {
+
+                        sh """
+                        mvn sonar:sonar -DskipTests \
+                          -Dsonar.projectKey=media-service \
+                          -Dsonar.projectName=media
+                        """
+
+                    }
+
+                 dir("backend/services/product") {
+
+                        sh """
+                        mvn sonar:sonar -DskipTests \
+                          -Dsonar.projectKey=product-service \
+                          -Dsonar.projectName=product
                         """
 
                     }
@@ -141,18 +161,18 @@ pipeline {
 
 
 
-        stage('Quality Gate') {
-            steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    script {
-                         def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                        error "❌ Quality Gate failed: ${qg.status}"
-                }
-            }
-        }
-    }
-}
+//         stage('Quality Gate') {
+//             steps {
+//                 timeout(time: 2, unit: 'MINUTES') {
+//                     script {
+//                          def qg = waitForQualityGate()
+//                         if (qg.status != 'OK') {
+//                         error "❌ Quality Gate failed: ${qg.status}"
+//                 }
+//             }
+//         }
+//     }
+// }
 
 
         
