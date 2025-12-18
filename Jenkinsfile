@@ -12,6 +12,7 @@ pipeline {
         DOCKER_IMAGE_TAG_PREV = 'previous'
         COMPOSE_FILE = 'docker-compose.yml'
         API_SONAR = 'https://sonarqube.buy01.site/api'
+        FAILED_SERVICES = []
     }
     stages {
         stage('Initialize') {
@@ -127,7 +128,6 @@ pipeline {
     }
     steps {
         script {
-            def failed = []
 
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
 
@@ -166,7 +166,7 @@ pipeline {
                                 ).trim()
 
                                 if (qualityGate != 'OK') {
-                                    failed.add(svc)
+                                    FAILED_SERVICES << svc
                                     error("❌ Quality Gate FAILED for ${svc}")
                                 } else {
                                     echo "✅ Quality Gate PASSED for ${svc}"
@@ -177,10 +177,8 @@ pipeline {
                 }
             }
 
-            if (failed.size() > 0) {
-                echo failed
-                currentBuild.result = 'FAILURE'
-                env.FAILED_SERVICES = failed.join(',')
+            if (FAILED_SERVICES.size() > 0) {
+                currentBuild.result = 'FAILURE',
             }
         }
     }
@@ -188,7 +186,7 @@ pipeline {
         failure {
             slackSend(
                 channel: '#jenkins',
-                message: "❌ SonarQube failed for services: ${env.FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                message: "❌ SonarQube failed for services: ${FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
                 tokenCredentialId: 'slack-cred'
             )
         }
