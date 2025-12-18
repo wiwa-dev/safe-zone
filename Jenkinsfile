@@ -142,7 +142,14 @@ pipeline {
                             }
                     }
              }
-             withSonarQubeEnv('sonarqube') {
+             
+        }
+    }
+}
+          stage('Sonar + Quality Gate') {
+    steps {
+        script {
+        withSonarQubeEnv('sonarqube') {
                   dir("backend/services/media") {
 
                         sh """
@@ -159,6 +166,15 @@ pipeline {
                             }
                     }
              }
+
+ }
+    }
+          }
+
+
+         stage('Sonar + Quality Gate') {
+    steps {
+        script {
             withSonarQubeEnv('sonarqube') {
                     
                  dir("backend/services/product") {
@@ -177,12 +193,13 @@ pipeline {
                             }
                     }
             }
-        }
+
+ }
     }
-}
+          }
 
 
-
+        
         stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
