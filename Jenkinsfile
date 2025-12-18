@@ -166,7 +166,7 @@ pipeline {
                                 ).trim()
 
                                 if (qualityGate != 'OK') {
-                                    failed << svc
+                                    failed.add(svc)
                                     error("❌ Quality Gate FAILED for ${svc}")
                                 } else {
                                     echo "✅ Quality Gate PASSED for ${svc}"
