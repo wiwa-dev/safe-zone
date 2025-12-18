@@ -178,7 +178,7 @@ pipeline {
             }
 
             if (FAILED_SERVICES.size() > 0) {
-                currentBuild.result = 'FAILURE',
+                currentBuild.result = 'FAILURE'
             }
         }
     }
