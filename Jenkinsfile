@@ -120,66 +120,91 @@ pipeline {
             }
         }
 
-        
-       stage('Sonar + Quality Gate') {
+    stage('SonarQube Analysis') {
+    when {
+        expression { CHANGED_SERVICES.size() > 0 }
+    }
     steps {
         script {
-            withSonarQubeEnv('sonarqube') {
-                    dir("backend/services/user") {
+            def failed = []
 
-                        sh """
-                        mvn sonar:sonar -DskipTests \
-                          -Dsonar.projectKey=user-service \
-                          -Dsonar.projectName=user
-                        """
-                        sh 'cp target/sonar/report-task.txt /var/jenkins_home/workspace/safe-zone/.scannerwork/'
+            withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
 
-                    }
-                    
-                 // dir("backend/services/media") {
+                parallel CHANGED_SERVICES.collectEntries { svc ->
+                    ["Sonar-${svc}": {
 
-                 //        sh """
-                 //        mvn sonar:sonar -DskipTests \
-                 //          -Dsonar.projectKey=media-service \
-                 //          -Dsonar.projectName=media
-                 //        """
+                        withSonarQubeEnv('sonarqube') {
+                            dir("backend/services/${svc}") {
 
-                 //    }
+                                sh "mvn clean package -DskipTests sonar:sonar -Dsonar.projectKey=${svc}-service"
 
-                 // dir("backend/services/product") {
+                                def ceTaskId = sh(
+                                    script: "grep '^ceTaskId=' target/sonar/report-task.txt | cut -d= -f2",
+                                    returnStdout: true
+                                ).trim()
 
-                 //        sh """
-                 //        mvn sonar:sonar -DskipTests \
-                 //          -Dsonar.projectKey=product-service \
-                 //          -Dsonar.projectName=product
-                 //        """
+                                timeout(time: 2, unit: 'MINUTES') {
+                                    waitUntil {
+                                        def taskStatus = sh(
+                                            script: """
+                                                curl -s -u ${SONAR_TOKEN}: \
+                                                https://sonarqube.buy01.site/api/ce/task?id=${ceTaskId} \
+                                                | jq -r '.task.status'
+                                            """,
+                                            returnStdout: true
+                                        ).trim()
 
-                 //    }
+                                        return taskStatus == 'SUCCESS'
+                                    }
+                                }
+
+                                def analysisId = sh(
+                                    script: """
+                                        curl -s -u ${SONAR_TOKEN}: \
+                                        https://sonarqube.buy01.site/api/ce/task?id=${ceTaskId} \
+                                        | jq -r '.task.analysisId'
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+
+                                def qualityGate = sh(
+                                    script: """
+                                        curl -s -u ${SONAR_TOKEN}: \
+                                        https://sonarqube.buy01.site/api/qualitygates/project_status?analysisId=${analysisId} \
+                                        | jq -r '.projectStatus.status'
+                                    """,
+                                    returnStdout: true
+                                ).trim()
+
+                                if (qualityGate != 'OK') {
+                                    failed << svc
+                                    error("❌ Quality Gate FAILED for ${svc}")
+                                } else {
+                                    echo "✅ Quality Gate PASSED for ${svc}"
+                                }
+                            }
+                        }
+                    }]
+                }
             }
-            def qualityGate = waitForQualityGate()
-                    if (qualityGate.status != 'OK') {
-                        error "SonarQube Quality Gate failed: ${qualityGate.status}"
-                    } else {
-                        echo "SonarQube Quality Gate passed."
-                    }
+
+            if (failed.size() > 0) {
+                currentBuild.result = 'FAILURE'
+                env.FAILED_SERVICES = failed.join(',')
+            }
+        }
+    }
+    post {
+        failure {
+            slackSend(
+                channel: '#jenkins',
+                message: "❌ SonarQube failed for services: ${env.FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                tokenCredentialId: 'slack-cred'
+            )
         }
     }
 }
 
-
-
-//         stage('Quality Gate') {
-//             steps {
-//                 timeout(time: 2, unit: 'MINUTES') {
-//                     script {
-//                          def qg = waitForQualityGate()
-//                         if (qg.status != 'OK') {
-//                         error "❌ Quality Gate failed: ${qg.status}"
-//                 }
-//             }
-//         }
-//     }
-// }
 
 
         
