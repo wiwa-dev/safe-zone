@@ -134,12 +134,7 @@ pipeline {
                         """
 
                     }
-                    def qualityGate = waitForQualityGate()
-                    if (qualityGate.status != 'OK') {
-                        error "SonarQube Quality Gate failed: ${qualityGate.status}"
-                    } else {
-                        echo "SonarQube Quality Gate passed."
-                    }
+                    
                  // dir("backend/services/media") {
 
                  //        sh """
@@ -160,6 +155,12 @@ pipeline {
 
                  //    }
             }
+            def qualityGate = waitForQualityGate()
+                    if (qualityGate.status != 'OK') {
+                        error "SonarQube Quality Gate failed: ${qualityGate.status}"
+                    } else {
+                        echo "SonarQube Quality Gate passed."
+                    }
         }
     }
 }
