@@ -130,9 +130,9 @@ pipeline {
                         sh """
                         mvn sonar:sonar -DskipTests \
                           -Dsonar.projectKey=user-service \
-                          -Dsonar.projectName=user \
-                          cp target/sonar/report-task.txt /var/jenkins_home/workspace/safe-zone/.scannerwork/
+                          -Dsonar.projectName=user
                         """
+                        sh 'cp target/sonar/report-task.txt /var/jenkins_home/workspace/safe-zone/.scannerwork/'
 
                     }
                     
