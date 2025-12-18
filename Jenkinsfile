@@ -11,6 +11,7 @@ pipeline {
         DOCKER_IMAGE_TAG_LAST = 'latest'
         DOCKER_IMAGE_TAG_PREV = 'previous'
         COMPOSE_FILE = 'docker-compose.yml'
+        API_SONAR = 'https://sonarqube.buy01.site/api'
     }
     stages {
         stage('Initialize') {
@@ -146,11 +147,7 @@ pipeline {
                                 timeout(time: 2, unit: 'MINUTES') {
                                     waitUntil {
                                         def taskStatus = sh(
-                                            script: """
-                                                curl -s -u ${SONAR_TOKEN}: \
-                                                https://sonarqube.buy01.site/api/ce/task?id=${ceTaskId} \
-                                                | jq -r '.task.status'
-                                            """,
+                                            script: 'curl -s -u $SONAR_TOKEN: $API_SONAR/ce/task?id=' + ceTaskId + ' | jq -r ".task.status"',
                                             returnStdout: true
                                         ).trim()
 
@@ -159,20 +156,12 @@ pipeline {
                                 }
 
                                 def analysisId = sh(
-                                    script: """
-                                        curl -s -u ${SONAR_TOKEN}: \
-                                        https://sonarqube.buy01.site/api/ce/task?id=${ceTaskId} \
-                                        | jq -r '.task.analysisId'
-                                    """,
+                                    script: 'curl -s -u $SONAR_TOKEN: $API_SONAR/ce/task?id=' + ceTaskId + ' | jq -r ".task.analysisId"',
                                     returnStdout: true
                                 ).trim()
 
                                 def qualityGate = sh(
-                                    script: """
-                                        curl -s -u ${SONAR_TOKEN}: \
-                                        https://sonarqube.buy01.site/api/qualitygates/project_status?analysisId=${analysisId} \
-                                        | jq -r '.projectStatus.status'
-                                    """,
+                                    script: 'curl -s -u $SONAR_TOKEN: $API_SONAR/qualitygates/project_status?analysisId=' + analysisId +  ' | jq -r ".projectStatus.status"',
                                     returnStdout: true
                                 ).trim()
 
