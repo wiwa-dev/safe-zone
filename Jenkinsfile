@@ -187,7 +187,7 @@ pipeline {
         failure {
             slackSend(
                 channel: '#jenkins',
-                message: "❌ SonarQube failed for services: ${env.FAILED_SERVICES.join(', ')}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                message: "❌ SonarQube failed for services: ${env.FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
                 tokenCredentialId: 'slack-cred'
             )
         }
