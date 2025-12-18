@@ -116,6 +116,7 @@ pipeline {
                         npm run test
                         '''
                     }
+                    
                 }
             }
         }
@@ -134,6 +135,12 @@ pipeline {
                         """
 
                     }
+                 timeout(time: 2, unit: 'MINUTES') {
+                         def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                        error "❌ Quality Gate failed: ${qg.status}"
+                            }
+                    }
 
                  dir("backend/services/media") {
 
@@ -144,7 +151,12 @@ pipeline {
                         """
 
                     }
-
+                     timeout(time: 2, unit: 'MINUTES') {
+                         def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                        error "❌ Quality Gate failed: ${qg.status}"
+                            }
+                    }
                  dir("backend/services/product") {
 
                         sh """
@@ -153,6 +165,12 @@ pipeline {
                           -Dsonar.projectName=product
                         """
 
+                    }
+                 timeout(time: 2, unit: 'MINUTES') {
+                         def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                        error "❌ Quality Gate failed: ${qg.status}"
+                            }
                     }
             }
         }
