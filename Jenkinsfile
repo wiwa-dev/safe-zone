@@ -116,17 +116,16 @@ pipeline {
                         npm run test
                         '''
                     }
-                    
                 }
             }
         }
 
         
-       stage('Sonar user') {
+       stage('Sonar + Quality Gate') {
     steps {
         script {
-             withSonarQubeEnv('sonarqube') {
-                 dir("backend/services/user") {
+            withSonarQubeEnv('sonarqube') {
+                    dir("backend/services/user") {
 
                         sh """
                         mvn sonar:sonar -DskipTests \
@@ -135,22 +134,8 @@ pipeline {
                         """
 
                     }
-                 // timeout(time: 2, unit: 'MINUTES') {
-                 //         def qg = waitForQualityGate()
-                 //        if (qg.status != 'OK') {
-                 //        error "❌ Quality Gate failed: ${qg.status}"
-                 //            }
-                 //    }
-             }
-             
-        }
-    }
-}
-          stage('Sonar media') {
-    steps {
-        script {
-        withSonarQubeEnv('sonarqube') {
-                  dir("backend/services/media") {
+
+                 dir("backend/services/media") {
 
                         sh """
                         mvn sonar:sonar -DskipTests \
@@ -159,24 +144,7 @@ pipeline {
                         """
 
                     }
-                    //  timeout(time: 2, unit: 'MINUTES') {
-                    //      def qg = waitForQualityGate()
-                    //     if (qg.status != 'OK') {
-                    //     error "❌ Quality Gate failed: ${qg.status}"
-                    //         }
-                    // }
-             }
 
- }
-    }
-          }
-
-
-         stage('Sonar product') {
-    steps {
-        script {
-            withSonarQubeEnv('sonarqube') {
-                    
                  dir("backend/services/product") {
 
                         sh """
@@ -186,20 +154,13 @@ pipeline {
                         """
 
                     }
-                 // timeout(time: 2, unit: 'MINUTES') {
-                 //         def qg = waitForQualityGate()
-                 //        if (qg.status != 'OK') {
-                 //        error "❌ Quality Gate failed: ${qg.status}"
-                 //            }
-                 //    }
             }
-
- }
+        }
     }
-          }
+}
 
 
-        
+
         stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
