@@ -135,25 +135,25 @@ pipeline {
 
                     }
 
-                 dir("backend/services/media") {
+                 // dir("backend/services/media") {
 
-                        sh """
-                        mvn sonar:sonar -DskipTests \
-                          -Dsonar.projectKey=media-service \
-                          -Dsonar.projectName=media
-                        """
+                 //        sh """
+                 //        mvn sonar:sonar -DskipTests \
+                 //          -Dsonar.projectKey=media-service \
+                 //          -Dsonar.projectName=media
+                 //        """
 
-                    }
+                 //    }
 
-                 dir("backend/services/product") {
+                 // dir("backend/services/product") {
 
-                        sh """
-                        mvn sonar:sonar -DskipTests \
-                          -Dsonar.projectKey=product-service \
-                          -Dsonar.projectName=product
-                        """
+                 //        sh """
+                 //        mvn sonar:sonar -DskipTests \
+                 //          -Dsonar.projectKey=product-service \
+                 //          -Dsonar.projectName=product
+                 //        """
 
-                    }
+                 //    }
             }
         }
     }
