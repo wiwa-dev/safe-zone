@@ -146,57 +146,57 @@ pipeline {
         }
     }
 }
- //          stage('Sonar media') {
- //    steps {
- //        script {
- //        withSonarQubeEnv('sonarqube') {
- //                  dir("backend/services/media") {
+          stage('Sonar media') {
+    steps {
+        script {
+        withSonarQubeEnv('sonarqube') {
+                  dir("backend/services/media") {
 
- //                        sh """
- //                        mvn sonar:sonar -DskipTests \
- //                          -Dsonar.projectKey=media-service \
- //                          -Dsonar.projectName=media
- //                        """
+                        sh """
+                        mvn sonar:sonar -DskipTests \
+                          -Dsonar.projectKey=media-service \
+                          -Dsonar.projectName=media
+                        """
 
- //                    }
- //                     timeout(time: 2, unit: 'MINUTES') {
- //                         def qg = waitForQualityGate()
- //                        if (qg.status != 'OK') {
- //                        error "❌ Quality Gate failed: ${qg.status}"
- //                            }
- //                    }
- //             }
+                    }
+                    //  timeout(time: 2, unit: 'MINUTES') {
+                    //      def qg = waitForQualityGate()
+                    //     if (qg.status != 'OK') {
+                    //     error "❌ Quality Gate failed: ${qg.status}"
+                    //         }
+                    // }
+             }
 
- // }
- //    }
- //          }
+ }
+    }
+          }
 
 
- //         stage('Sonar product') {
- //    steps {
- //        script {
- //            withSonarQubeEnv('sonarqube') {
+         stage('Sonar product') {
+    steps {
+        script {
+            withSonarQubeEnv('sonarqube') {
                     
- //                 dir("backend/services/product") {
+                 dir("backend/services/product") {
 
- //                        sh """
- //                        mvn sonar:sonar -DskipTests \
- //                          -Dsonar.projectKey=product-service \
- //                          -Dsonar.projectName=product
- //                        """
+                        sh """
+                        mvn sonar:sonar -DskipTests \
+                          -Dsonar.projectKey=product-service \
+                          -Dsonar.projectName=product
+                        """
 
- //                    }
- //                 timeout(time: 2, unit: 'MINUTES') {
- //                         def qg = waitForQualityGate()
- //                        if (qg.status != 'OK') {
- //                        error "❌ Quality Gate failed: ${qg.status}"
- //                            }
- //                    }
- //            }
+                    }
+                 // timeout(time: 2, unit: 'MINUTES') {
+                 //         def qg = waitForQualityGate()
+                 //        if (qg.status != 'OK') {
+                 //        error "❌ Quality Gate failed: ${qg.status}"
+                 //            }
+                 //    }
+            }
 
- // }
- //    }
- //          }
+ }
+    }
+          }
 
 
         
