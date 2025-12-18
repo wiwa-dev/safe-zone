@@ -178,6 +178,7 @@ pipeline {
             }
 
             if (failed.size() > 0) {
+                echo failed
                 currentBuild.result = 'FAILURE'
                 env.FAILED_SERVICES = failed.join(',')
             }
