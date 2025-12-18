@@ -145,15 +145,15 @@ pipeline {
 
                  //    }
 
-                 // dir("backend/services/product") {
+                 dir("backend/services/product") {
 
-                 //        sh """
-                 //        mvn sonar:sonar -DskipTests \
-                 //          -Dsonar.projectKey=product-service \
-                 //          -Dsonar.projectName=product
-                 //        """
+                        sh """
+                        mvn sonar:sonar -DskipTests \
+                          -Dsonar.projectKey=product-service \
+                          -Dsonar.projectName=product
+                        """
 
-                 //    }
+                    }
             }
         }
     }
