@@ -125,8 +125,8 @@ pipeline {
        stage('Sonar + Quality Gate') {
     steps {
         script {
-            withSonarQubeEnv('sonarqube') {
-                    dir("backend/services/user") {
+             withSonarQubeEnv('sonarqube') {
+                 dir("backend/services/user") {
 
                         sh """
                         mvn sonar:sonar -DskipTests \
@@ -141,8 +141,9 @@ pipeline {
                         error "❌ Quality Gate failed: ${qg.status}"
                             }
                     }
-
-                 dir("backend/services/media") {
+             }
+             withSonarQubeEnv('sonarqube') {
+                  dir("backend/services/media") {
 
                         sh """
                         mvn sonar:sonar -DskipTests \
@@ -157,6 +158,9 @@ pipeline {
                         error "❌ Quality Gate failed: ${qg.status}"
                             }
                     }
+             }
+            withSonarQubeEnv('sonarqube') {
+                    
                  dir("backend/services/product") {
 
                         sh """
