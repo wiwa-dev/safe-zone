@@ -27,6 +27,6 @@ public class Media {
     private String productId;
 
     public Boolean isSameNumberValue(AtomicLong a, AtomicLong b) {
-        return a.equals(b); // Noncompliant, this is true only if a == b....
+        return a.equals(b); // Noncompliant, this is true only if a == b.
     }
 }
