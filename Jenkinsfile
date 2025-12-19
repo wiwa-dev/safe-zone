@@ -127,12 +127,11 @@ pipeline {
     }
     steps {
         script {
-            def FAILED_SERVICES = []
 
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
 
                 parallel CHANGED_SERVICES.collectEntries { svc ->
-    ["Sonar-${svc}": {
+    ["Sonar-Analysis-${svc}": {
         try {
             withSonarQubeEnv('sonarqube') {
                 dir("backend/services/${svc}") {
@@ -165,12 +164,7 @@ pipeline {
                     ).trim()
 
                     if (qualityGate != 'OK') {
-                        throw new Exception("Quality Gate FAILED")
-                        slackSend(
-                            channel: '#jenkins',
-                            message: "❌ SonarQube failed for service: ${svc}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
-                            tokenCredentialId: 'slack-cred'
-                        )
+                        throw new Exception("Quality Gate FAILED")   
                     }
 
                     echo "✅ Quality Gate PASSED for ${svc}"
@@ -178,7 +172,11 @@ pipeline {
             }
         } catch (err) {
             echo "❌ Sonar FAILED for ${svc}"
-            FAILED_SERVICES.add(svc)
+            slackSend(
+                    channel: '#jenkins',
+                    message: "❌ SonarQube failed for service: ${svc}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                    tokenCredentialId: 'slack-cred'
+                )
         }
     }]
 }
