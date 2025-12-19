@@ -180,7 +180,7 @@ pipeline {
 
             }
 
-            if (failedServices.size() > 0) {
+            if (FAILED_SERVICES.size() > 0) {
                 // env.FAILED_SERVICES = failedServices.join(', ')
                 currentBuild.result = 'FAILURE'
                 error("❌ SonarQube failed for services: ${env.FAILED_SERVICES}")
