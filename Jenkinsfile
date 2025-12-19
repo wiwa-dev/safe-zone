@@ -127,67 +127,74 @@ pipeline {
     }
     steps {
         script {
-            failed = []
-
+            def failedServices = []
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
 
                 parallel CHANGED_SERVICES.collectEntries { svc ->
-                    ["Sonar-${svc}": {
+    ["Sonar-Analysis-${svc}": {
+        try {
+            withSonarQubeEnv('sonarqube') {
+                dir("backend/services/${svc}") {
 
-                        withSonarQubeEnv('sonarqube') {
-                            dir("backend/services/${svc}") {
+                    sh "mvn clean package -DskipTests sonar:sonar -Dsonar.projectKey=${svc}-service"
 
-                                sh "mvn clean package -DskipTests sonar:sonar -Dsonar.projectKey=${svc}-service"
+                    def ceTaskId = sh(
+                        script: "grep '^ceTaskId=' target/sonar/report-task.txt | cut -d= -f2",
+                        returnStdout: true
+                    ).trim()
 
-                                def ceTaskId = sh(
-                                    script: "grep '^ceTaskId=' target/sonar/report-task.txt | cut -d= -f2",
-                                    returnStdout: true
-                                ).trim()
-
-                                timeout(time: 2, unit: 'MINUTES') {
-                                    waitUntil {
-                                        def taskStatus = sh(
-                                            script: 'curl -s -u $SONAR_TOKEN: $API_SONAR/ce/task?id=' + ceTaskId + ' | jq -r ".task.status"',
-                                            returnStdout: true
-                                        ).trim()
-
-                                        return taskStatus == 'SUCCESS'
-                                    }
-                                }
-
-                                def analysisId = sh(
-                                    script: 'curl -s -u $SONAR_TOKEN: $API_SONAR/ce/task?id=' + ceTaskId + ' | jq -r ".task.analysisId"',
-                                    returnStdout: true
-                                ).trim()
-
-                                def qualityGate = sh(
-                                    script: 'curl -s -u $SONAR_TOKEN: $API_SONAR/qualitygates/project_status?analysisId=' + analysisId +  ' | jq -r ".projectStatus.status"',
-                                    returnStdout: true
-                                ).trim()
-
-                                if (qualityGate != 'OK') {
-                                    failed << svc
-                                    error("❌ Quality Gate FAILED for ${svc}")
-                                    
-                                } else {
-                                    echo "✅ Quality Gate PASSED for ${svc}"
-                                }
-                            }
+                    timeout(time: 2, unit: 'MINUTES') {
+                        waitUntil {
+                            def status = sh(
+                                script: "curl -s -u $SONAR_TOKEN: $API_SONAR/ce/task?id=${ceTaskId} | jq -r '.task.status'",
+                                returnStdout: true
+                            ).trim()
+                            return status == 'SUCCESS'
                         }
-                    }]
+                    }
+
+                    def analysisId = sh(
+                        script: "curl -s -u $SONAR_TOKEN: $API_SONAR/ce/task?id=${ceTaskId} | jq -r '.task.analysisId'",
+                        returnStdout: true
+                    ).trim()
+
+                    def qualityGate = sh(
+                        script: "curl -s -u $SONAR_TOKEN: $API_SONAR/qualitygates/project_status?analysisId=${analysisId} | jq -r '.projectStatus.status'",
+                        returnStdout: true
+                    ).trim()
+
+                    if (qualityGate != 'OK') {
+                        throw new Exception("Quality Gate FAILED")   
+                    }
+
+                    echo "✅ Quality Gate PASSED for ${svc}"
                 }
             }
+        } catch (err) {
+            echo "❌ Sonar FAILED for ${svc}"
+            failedServices << svc
+            
+        }
+    }]
+}
 
-            if (failed.size() > 0) {
-                slackSend(
-                        channel: '#jenkins',
-                        message: "❌ SonarQube failed for services: ${failed}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
-                        tokenCredentialId: 'slack-cred'
-                )
-                currentBuild.result = 'FAILURE'                
             }
+
+           if (failedServices.size() > 0) {
+                slackSend(
+                    channel: '#jenkins',
+                    message: "❌ SonarQube FAILED for services: ${failedServices.join(', ')}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                    tokenCredentialId: 'slack-cred'
+                )
+
+                currentBuild.result = 'FAILURE'
+                error("Quality Gate FAILED")
+            }
+
+
         }
     }
+    
 }
 
 
