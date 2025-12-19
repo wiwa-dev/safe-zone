@@ -177,7 +177,7 @@ pipeline {
                 }
             }
 
-            if (failed.size() > 0) {
+            if (FAILED_SERVICES.size() > 0) {
                 currentBuild.result = 'FAILURE'
                 // failed = env.FAILED_SERVICES = failed.join(',')
             }

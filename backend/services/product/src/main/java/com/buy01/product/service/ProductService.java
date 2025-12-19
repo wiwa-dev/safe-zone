@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-// test.
+// test
 @Service
 @RequiredArgsConstructor
 public class ProductService {
