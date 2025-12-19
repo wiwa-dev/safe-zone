@@ -209,6 +209,7 @@ stage('SonarQube Frontend') {
 
                     sh """
                   ${tool 'sonar8'}/bin/sonar-scanner \
+                  -Dsonar.projectKey=frontend
                   -Dsonar.sources=src \
                   -Dsonar.exclusions=**/*.spec.ts
                 """
