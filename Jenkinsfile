@@ -136,7 +136,7 @@ pipeline {
             withSonarQubeEnv('sonarqube') {
                 dir("backend/services/${svc}") {
 
-                    sh "mvn clean package -DskipTests sonar:sonar -Dsonar.projectKey=${svc}-service"
+                    sh "mvn clean compile -DskipTests sonar:sonar -Dsonar.projectKey=${svc}-service"
 
                     def ceTaskId = sh(
                         script: "grep '^ceTaskId=' target/sonar/report-task.txt | cut -d= -f2",
@@ -198,6 +198,24 @@ pipeline {
 }
 
 
+stage('SonarQube Frontend') {
+    when {
+        expression { FRONTEND_CHANGED }
+    }
+    steps {
+        dir('frontend') {
+            withSonarQubeEnv('sonarqube') {
+
+                    sh """
+                  ${tool 'sonar8'}/bin/sonar-scanner \
+                  -Dsonar.sources=src \
+                  -Dsonar.exclusions=**/*.spec.ts
+                """
+
+            }
+        }
+    }
+}
 
         
         stage('Build Backend Server Config') {
