@@ -173,9 +173,7 @@ pipeline {
             }
         } catch (err) {
             echo "❌ Sonar FAILED for ${svc}"
-            synchronized (this) {
-                failedServices << svc
-            }
+            failedServices << svc
         }
     }]
 }
