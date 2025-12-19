@@ -127,7 +127,7 @@ pipeline {
     }
     steps {
         script {
-            def failedServices = []
+            def FAILED_SERVICES = []
 
             withCredentials([string(credentialsId: 'sonar-cred', variable: 'SONAR_TOKEN')]) {
 
@@ -173,7 +173,7 @@ pipeline {
             }
         } catch (err) {
             echo "❌ Sonar FAILED for ${svc}"
-            failedServices << svc
+            FAILED_SERVICES.add(svc)
         }
     }]
 }
@@ -181,7 +181,7 @@ pipeline {
             }
 
             if (failedServices.size() > 0) {
-                env.FAILED_SERVICES = failedServices.join(', ')
+                // env.FAILED_SERVICES = failedServices.join(', ')
                 currentBuild.result = 'FAILURE'
                 error("❌ SonarQube failed for services: ${env.FAILED_SERVICES}")
                 }
@@ -192,7 +192,7 @@ pipeline {
         failure {
             slackSend(
                 channel: '#jenkins',
-                message: "❌ SonarQube failed for services: ${env.FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                message: "❌ SonarQube failed for services: ${FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
                 tokenCredentialId: 'slack-cred'
             )
         }
