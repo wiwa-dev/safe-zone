@@ -13,11 +13,7 @@ pipeline {
         COMPOSE_FILE = 'docker-compose.yml'
         API_SONAR = 'https://sonarqube.buy01.site/api'
     }
-
-    def CHANGED_SERVICES = []
-    def CHANGED_SERVER_CONFIG = []
-    def FRONTEND_CHANGED = false
-
+    
     stages {
         stage('Initialize') {
             steps {
@@ -46,7 +42,9 @@ pipeline {
                     // Lister les fichiers modifiés au dernier commits
                     def files = sh(script: 'git diff --name-only HEAD^ HEAD', returnStdout: true).trim().split('\n')
                     echo "📄 Fichiers modifiés : ${files}"
-                    
+                    CHANGED_SERVICES = []
+                    CHANGED_SERVER_CONFIG = []
+                    FRONTEND_CHANGED = false
                     files.each {
                         file -> if (file.contains('backend/services/config-server')) {
                             CHANGED_SERVER_CONFIG.add('config-server')
