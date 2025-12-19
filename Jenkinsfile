@@ -166,6 +166,11 @@ pipeline {
 
                     if (qualityGate != 'OK') {
                         throw new Exception("Quality Gate FAILED")
+                        slackSend(
+                            channel: '#jenkins',
+                            message: "❌ SonarQube failed for service: ${svc}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
+                            tokenCredentialId: 'slack-cred'
+                        )
                     }
 
                     echo "✅ Quality Gate PASSED for ${svc}"
@@ -180,23 +185,11 @@ pipeline {
 
             }
 
-            if (FAILED_SERVICES.size() > 0) {
-                // env.FAILED_SERVICES = failedServices.join(', ')
-                currentBuild.result = 'FAILURE'
-                error("❌ SonarQube failed for services: ${env.FAILED_SERVICES}")
-                }
+           
 
         }
     }
-    post {
-        failure {
-            slackSend(
-                channel: '#jenkins',
-                message: "❌ SonarQube failed for services: ${FAILED_SERVICES}\nJob: ${env.JOB_NAME} #${env.BUILD_NUMBER}\n${env.BUILD_URL}",
-                tokenCredentialId: 'slack-cred'
-            )
-        }
-    }
+    
 }
 
 
