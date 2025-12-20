@@ -225,8 +225,8 @@ pipeline {
                                     echo "✅ Quality Gate PASSED for frontend"
                                 }
                             }
-                        } catch  {
-                            echo "❌ Sonar FAILED for frontend"
+                        } catch (err) {
+                            echo "❌ Sonar FAILED for frontend: ${err}"
                             failedServices = true
                         }
                     }
